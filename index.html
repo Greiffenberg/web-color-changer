@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Socket.IO chat</title>
+    <link rel="stylesheet" type="text/css" href="/general.css" />
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css"
+    />
+  </head>
+  <body>
+    <i id="togglebutton" class="togglebutton fa fa-sliders"></i>
+    <div class="slidecontainer" id="slidecontainer">
+      <div class="rangecontainer">
+        <input
+          type="range"
+          min="0"
+          max="255"
+          value="125"
+          id="red"
+          class="range"
+        />
+        <div id="outputred" class="output">XX</div>
+      </div>
+      <div class="rangecontainer">
+        <input
+          type="range"
+          min="0"
+          max="255"
+          value="125"
+          id="green"
+          class="range"
+        />
+        <div id="outputgreen" class="output">XX</div>
+      </div>
+      <div class="rangecontainer">
+        <input
+          type="range"
+          min="0"
+          max="255"
+          value="125"
+          id="blue"
+          class="range"
+        />
+        <div id="outputblue" class="output">XX</div>
+      </div>
+    </div>
+    <script src="/socket.io/socket.io.js"></script>
+    <script
+      src="https://code.jquery.com/jquery-3.6.0.slim.min.js"
+      integrity="sha256-u7e5khyithlIdTpu22PHhENmPcRdFiHRjhAuHcs05RI="
+      crossorigin="anonymous"
+    ></script>
+    <script>
+      $(document).ready(function () {
+        console.log("ready!");
+        String.prototype.pad = function (size) {
+          var s = String(this);
+          while (s.length < (size || 2)) {
+            s = "0" + s;
+          }
+          return s;
+        };
+        var socket = io();
+        var values = { red: 125, green: 125, blue: 125 };
+
+        socket.on("color-message", function (msg) {
+          console.log("color-message");
+          changeBackcolor(msg);
+        });
+        socket.on("settings", function (msg) {
+          console.log("settings");
+          const { showsliders } = msg;
+          $("#slidecontainer").toggle(!showsliders);
+        });
+
+        function changeBackcolor(value) {
+          const val = { ...values, ...value };
+          const { red, green, blue } = val;
+          !!red ? (outputred.innerHTML = red) : null;
+          !!red ? (sliderred.value = red) : null;
+          !!green ? (outputgreen.innerHTML = green) : null;
+          !!green ? (slidergreen.value = green) : null;
+          !!blue ? (outputblue.innerHTML = blue) : null;
+          !!blue ? (sliderblue.value = blue) : null;
+          var rgb =
+            "#" +
+            parseInt(outputred.innerHTML).toString(16).pad(2) +
+            parseInt(outputgreen.innerHTML).toString(16).pad(2) +
+            parseInt(outputblue.innerHTML).toString(16).pad(2);
+          // console.log("rgb=", rgb);
+          document.body.style = "background: " + rgb;
+        }
+
+        var togglebutton = document.getElementById("togglebutton");
+        togglebutton.onclick = function () {
+          socket.emit("settings", {
+            showsliders: $("#slidecontainer").css("display") !== "none",
+          });
+        };
+
+        var sliderred = document.getElementById("red");
+        var slidergreen = document.getElementById("green");
+        var sliderblue = document.getElementById("blue");
+        var outputred = document.getElementById("outputred");
+        var outputgreen = document.getElementById("outputgreen");
+        var outputblue = document.getElementById("outputblue");
+
+        changeBackcolor(values);
+
+        // Update the current slider value (each time you drag the slider handle)
+        sliderred.oninput = function () {
+          console.log("RED");
+          values = { ...values, red: this.value };
+          socket.emit("color-message", values);
+        };
+        slidergreen.oninput = function () {
+          values = { ...values, green: this.value };
+          socket.emit("color-message", values);
+        };
+        sliderblue.oninput = function () {
+          values = { ...values, blue: this.value };
+          socket.emit("color-message", values);
+        };
+      });
+    </script>
+  </body>
+</html>
