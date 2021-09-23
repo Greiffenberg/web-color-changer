@@ -24,6 +24,6 @@ io.on("connection", (socket) => {
   });
 });
 
-server.listen(5003, () => {
-  console.log("listening on *:5003");
+server.listen(8080, () => {
+  console.log("listening on *:8080");
 });
