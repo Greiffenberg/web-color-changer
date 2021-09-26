@@ -65,7 +65,6 @@
         var values = { red: 125, green: 125, blue: 125 };
 
         socket.on("color-message", function (msg) {
-          console.log("color-message");
           changeBackcolor(msg);
         });
         socket.on("settings", function (msg) {
